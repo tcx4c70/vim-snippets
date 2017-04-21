@@ -4,22 +4,95 @@
 
 priority -50
 
+global !p
+from docstring import *
+endglobal
+
+#==========================================================================
+#    preprocessor
+#==========================================================================
+#--------------------------------------------------------------------------
+#    include global header
+#--------------------------------------------------------------------------
+snippet incg "#include <...>"
+#include <${1:stdio.h}>
+endsnippet
+
+#--------------------------------------------------------------------------
+#    include local header
+#--------------------------------------------------------------------------
+snippet incl "#include ''...''"
+#include "$1"
+endsnippet
+
+#--------------------------------------------------------------------------
+#    define
+#--------------------------------------------------------------------------
 snippet def "#define ..."
 #define $1
 endsnippet
 
-snippet #ifndef "#ifndef ... #define ... #endif"
+#--------------------------------------------------------------------------
+#    undefine
+#--------------------------------------------------------------------------
+snippet unde "#undef ..."
+#undef $1
+endsnippet
+
+#--------------------------------------------------------------------------
+#    if-endif
+#--------------------------------------------------------------------------
+snippet #ifei "#if ... ... #endif" b
+#if ${1:0}
+${VISUAL}${0:/* do something */}
+#endif /* ----  #if $1  `!p snip.rv = (39-len(t[1]))*'-'` */
+endsnippet
+
+#--------------------------------------------------------------------------
+#    if-else-endif
+#--------------------------------------------------------------------------
+snippet #ifee "#if ... ... #else ... #endif"
+#if ${1:0}
+${2:/* do something */}
+#else  /* ----  not $1  `!p snip.rv = (39-len(t[1]))*'-'` */
+${3:/* do something */}
+#endif /* ----  #if $1  `!p snip.rv = (39-len(t[1]))*'-'` */
+endsnippet
+
+#--------------------------------------------------------------------------
+#    ifdef-else-endif
+#--------------------------------------------------------------------------
+snippet #ifdee "#ifdef ... ... #else ... #endif"
+#ifdef ${1:SYMBOL}
+${2:/* do something */}
+#else  /* ----  not $1  `!p snip.rv = (39-len(t[1]))*'-'` */
+${3:/* do something */}
+#endif /* ----  #ifdef $1  `!p snip.rv = (36-len(t[1]))*'-'` */
+endsnippet
+
+#--------------------------------------------------------------------------
+#    ifndef-else-endif
+#--------------------------------------------------------------------------
+snippet #ifndee "#ifndef ... ... #else ... #endif"
+#ifndef ${1:SYMBOL}
+${2:/* do something */}
+#else  /* ----  not $1  `!p snip.rv = (39-len(t[1]))*'-'` */
+${3:/* do something */}
+#endif /* ----  #ifndef $1  `!p snip.rv = (35-len(t[1]))*'-'` */
+endsnippet
+
+#--------------------------------------------------------------------------
+#    ifndef-define-endif
+#--------------------------------------------------------------------------
+snippet #ifndde "#ifndef ... #define ... #endif"
 #ifndef ${1/([A-Za-z0-9_]+).*/$1/}
 #define ${1:SYMBOL} ${2:value}
-#endif /* ifndef $1 */
+#endif /* ----  #ifndef $1  `!p snip.rv = (35-len(t[1]))*'-'` */
 endsnippet
 
-snippet #if "#if #endif" b
-#if ${1:0}
-${VISUAL}$0
-#endif
-endsnippet
-
+#--------------------------------------------------------------------------
+#    mark
+#--------------------------------------------------------------------------
 snippet mark "#pragma mark (mark)"
 #if 0
 ${1:#pragma mark -
@@ -29,71 +102,349 @@ ${1:#pragma mark -
 $0
 endsnippet
 
-snippet main "main() (main)"
-int main(int argc, char *argv[])
-{
-	${VISUAL}$0
-	return 0;
-}
-endsnippet
-
-snippet for "for loop (for)"
-for (${2:i} = 0; $2 < ${1:count}; ${3:++$2}) {
-	${VISUAL}$0
-}
-endsnippet
-
-snippet fori "for int loop (fori)"
-for (${4:int} ${2:i} = 0; $2 < ${1:count}; ${3:++$2}) {
-	${VISUAL}$0
-}
-endsnippet
-
-snippet once "Include header once only guard"
+#--------------------------------------------------------------------------
+#    include header once only guard
+#--------------------------------------------------------------------------
+snippet once "include header once only guard"
 #ifndef ${1:`!p
 if not snip.c:
 	import random, string
 	name = re.sub(r'[^A-Za-z0-9]+','_', snip.fn).upper()
-	rand = ''.join(random.sample(string.ascii_letters+string.digits, 8))
-	snip.rv = ('%s_%s' % (name,rand)).upper()
+	snip.rv = '__%s__' % name
 else:
 	snip.rv = snip.c`}
 #define $1
 
-${VISUAL}$0
+${VISUAL}${0:/* continue here */}
 
-#endif /* end of include guard: $1 */
+#endif /* ----  #ifndef $1  `!p snip.rv = (35-len(t[1]))*'-'` */
 endsnippet
 
-snippet fprintf "fprintf ..."
-fprintf(${1:stderr}, "${2:%s}\n"${2/([^%]|%%)*(%.)?.*/(?2:, :\);)/}$3${2/([^%]|%%)*(%.)?.*/(?2:\);)/}
-endsnippet
-
-snippet eli "else if .. (eli)"
-else if (${1:/* condition */}) {
+#==========================================================================
+#    idioms
+#==========================================================================
+#--------------------------------------------------------------------------
+#    function
+#--------------------------------------------------------------------------
+snippet fun "function" b
+/*
+ * ====  FUNCTION  =============================================================
+ *         Name:  $2
+ *  Description:  TODO`!p write_c_function_docstring(t, snip)`
+ * =============================================================================
+ */
+${1:void}
+${2:function_name}($3)
+{
 	${VISUAL}$0
-}
+} /* ---- end of function $2  `!p snip.rv = (33-len(t[2]))*'-'` */
 endsnippet
 
+#--------------------------------------------------------------------------
+#    static function
+#--------------------------------------------------------------------------
+snippet sfun "static function" b
+/*
+ * ====  FUNCTION  =============================================================
+ *         Name:  $2
+ *  Description:  TODO`!p write_c_function_docstring(t, snip)`
+ * =============================================================================
+ */
+static ${1:void}
+${2:function_name}($3)
+{
+	${VISUAL}$0
+} /* ---- end of static function $2  `!p snip.rv = (26-len(t[2]))*'-'` */
+endsnippet
+
+#--------------------------------------------------------------------------
+#    main function
+#--------------------------------------------------------------------------
+snippet main "main() (main)"
+/*
+ * ====  FUNCTION  =============================================================
+ *         Name:  main
+ *  Description:  TODO
+ * =============================================================================
+ */
+int 
+main(int argc, char *argv[])
+{
+	${VISUAL}$0
+	return 0;
+} /* ---- end of function main  ----------------------------- */
+endsnippet
+
+#--------------------------------------------------------------------------
+#    enum
+#--------------------------------------------------------------------------
+snippet enum "enum"
+enum ${1:enum_name}
+{
+    ${2:/* data */}
+}; /* ----  end of enum $1  `!p snip.rv = (19-len(t[1]))*'-'` */
+${3:typedef enum $1 ${0:$1_t};}
+endsnippet
+
+#--------------------------------------------------------------------------
+#    struct
+#--------------------------------------------------------------------------
+snippet struct "struct"
+struct ${1:struct_name}
+{
+    ${2:/* data */}
+}; /* ----  end of struct $1  `!p snip.rv = (17-len(t[1]))*'-'` */
+${3:typedef struct $1 ${0:$1_t};}
+endsnippet
+
+#--------------------------------------------------------------------------
+#    union
+#--------------------------------------------------------------------------
+snippet union "union"
+union ${1:union_name}
+{
+    ${2:/* data */}
+}; /* ----  end of union $1  `!p snip.rv = (18-len(t[1]))*'-'` */
+${3:typedef union $1 ${0:$1_t};}
+endsnippet
+
+#--------------------------------------------------------------------------
+#    scanf
+#--------------------------------------------------------------------------
+snippet scanf "scanf .. (scanf)"
+scanf("${1:%d}\n"${1/([^%]|%%)*(%.)?.*/(?2:, :\);)/}$2${1/([^%]|%%)*(%.)?.*/(?2:\);)/}
+endsnippet
+
+#--------------------------------------------------------------------------
+#    printf
+#--------------------------------------------------------------------------
 snippet printf "printf .. (printf)"
 printf("${1:%s}\n"${1/([^%]|%%)*(%.)?.*/(?2:, :\);)/}$2${1/([^%]|%%)*(%.)?.*/(?2:\);)/}
 endsnippet
 
-snippet st "struct"
-struct ${1:`!p snip.rv = (snip.basename or "name") + "_t"`} {
-	${0:/* data */}
-};
+#--------------------------------------------------------------------------
+#    fscanf
+#--------------------------------------------------------------------------
+snippet fscanf "fscanf ..."
+fscanf(${1:stdin}, "${2:%s}\n"${2/([^%]|%%)*(%.)?.*/(?2:, :\);)/}$3${2/([^%]|%%)*(%.)?.*/(?2:\);)/}
 endsnippet
 
-snippet fun "function" b
-${1:void} ${2:function_name}($3)
+#--------------------------------------------------------------------------
+#    fprintf
+#--------------------------------------------------------------------------
+snippet fprintf "fprintf ..."
+fprintf(${1:stderr}, "${2:%s}\n"${2/([^%]|%%)*(%.)?.*/(?2:, :\);)/}$3${2/([^%]|%%)*(%.)?.*/(?2:\);)/}
+endsnippet
+
+#--------------------------------------------------------------------------
+#    calloc
+#--------------------------------------------------------------------------
+snippet calloc "calloc"
+${1:char}`!p snip.rv = " *" if t[1] else ""`${2:ptr} = calloc((size_t)(${3:/* count */}), sizeof(${4:/* type */}));
+if(NULL == $2)
 {
-	${VISUAL}$0
+    fprintf(stderr, "\ndynamic memory allocation failed\n");
+    exit(1);
+}
+${0:/* continue here */}
+free($2);
+$2 = NULL;
+endsnippet
+
+#--------------------------------------------------------------------------
+#    malloc
+#--------------------------------------------------------------------------
+snippet malloc "malloc"
+${1:char}`!p snip.rv = " *" if t[1] else ""`${2:ptr} = malloc(sizeof(${3:/* type */})`!p snip.rv = " * " if t[4] else ""`${4:/* count */});
+if(NULL == $2)
+{
+    fprintf(stderr, "\ndynamic memory allocation failed\n");
+    exit(1);
+}
+${0:/* continue here */}
+free($2);
+$2 = NULL;
+endsnippet
+
+#--------------------------------------------------------------------------
+#    realloc
+#--------------------------------------------------------------------------
+snippet realloc "realloc"
+${1:ptr} = realloc(${2:$1}, sizeof(${3:/* type */})`!p snip.rv = " * " if t[4] else ""`${4:/* count */});
+if(NULL == $1)
+{
+    fprintf(stderr, "\ndynamic memory allocation failed\n");
+    exit(1);
+}
+${0:/* continue here */}
+endsnippet
+
+#--------------------------------------------------------------------------
+#    sizeof
+#--------------------------------------------------------------------------
+snippet so "sizeof ..."
+sizeof($0);
+endsnippet
+
+#--------------------------------------------------------------------------
+#    assert
+#--------------------------------------------------------------------------
+snippet as "assert ..."
+assert($0);
+endsnippet
+
+#--------------------------------------------------------------------------
+#    open input file
+#--------------------------------------------------------------------------
+snippet opif "open input file"
+FILE *${1:input}; `!p snip.rv = (44-len(t[1]))*' '`/* input file pointer */
+char *${2:$1_file_name} = "$3"; `!p snip.rv = (39-len(t[2])-len(t[3]))*' '`/* input file name */
+
+$1 = fopen($2, "r");
+if(NULL == $1)
+{
+    fprintf(stderr, "couldn't open file '%s'; %s\n", $2, strerror(errno));
+    exit(1);
+}
+${4:/* cotinue here */}
+/* close input file */
+if(EOF == fclose($1))
+{
+    fprintf(stderr, "couldn't close file '%s'; %s\n", $2, strerror(errno));
+    exit(1);
 }
 endsnippet
 
-snippet fund "function declaration" b
-${1:void} ${2:function_name}($3);
+#--------------------------------------------------------------------------
+#    open ouput file
+#--------------------------------------------------------------------------
+snippet opof "open ouput file"
+FILE *${1:output}; `!p snip.rv = (44-len(t[1]))*' '`/* input file pointer */
+char *${2:$1_file_name} = "$3"; `!p snip.rv = (39-len(t[2])-len(t[3]))*' '`/* input file name */
+
+$1 = fopen($2, "r");
+if(NULL == $1)
+{
+    fprintf(stderr, "couldn't open file '%s'; %s\n", $2, strerror(errno));
+    exit(1);
+}
+${4:/* cotinue here */}
+/* close output file */
+if(EOF == fclose($1))
+{
+    fprintf(stderr, "couldn't close file '%s'; %s\n", $2, strerror(errno));
+    exit(1);
+}
+endsnippet
+
+#==========================================================================
+#    statements
+#==========================================================================
+#--------------------------------------------------------------------------
+#    for loop
+#--------------------------------------------------------------------------
+snippet for "for loop (for)"
+for(${1:i} = 0; $1 < ${2:count}; ${3:$1++})
+{
+	${VISUAL}${0:/* do something */}
+} /* ----  end for  --------- */
+endsnippet
+
+#--------------------------------------------------------------------------
+#    for int loop
+#--------------------------------------------------------------------------
+snippet fori "for int loop (fori)"
+for(${1:int} ${2:i} = 0; $2 < ${3:count}; ${4:$2++})
+{
+	${VISUAL}${0:/* do something */}
+} /* ----  end for  --------- */
+endsnippet
+
+#--------------------------------------------------------------------------
+#    while loop
+#--------------------------------------------------------------------------
+snippet while "while loop (while)"
+while(${1:1})
+{
+    ${VISUAL}${0:/* do something */}
+} /* ----  end while  ------- */
+endsnippet
+
+#--------------------------------------------------------------------------
+#    do-while loop
+#--------------------------------------------------------------------------
+snippet dowh "do-while loop (do-while)"
+do
+{
+    ${VISUAL}${0:/* do something */}
+}while(${1:1}); /* ----  end do-while  ---- */
+endsnippet
+
+#--------------------------------------------------------------------------
+#    if ... ...
+#--------------------------------------------------------------------------
+snippet if "if ... ..."
+if(${1:/* condition */})
+{
+    ${VISUAL}${0:/* if part */}
+}
+endsnippet
+
+#--------------------------------------------------------------------------
+#    if ... ... else ...
+#--------------------------------------------------------------------------
+snippet ifel "if ... ... else ..."
+if(${1:/* condition */})
+{
+    ${VISUAL}${2:/* if part */}
+}
+else
+{
+    ${0:/* else part */}
+}
+endsnippet
+
+#--------------------------------------------------------------------------
+#    else if ... ...
+#--------------------------------------------------------------------------
+snippet elif "else if ... ..."
+else if(${1:/* condition */})
+{
+	${VISUAL}${0:/* else if part */}
+}
+endsnippet
+
+#--------------------------------------------------------------------------
+#    else ...
+#--------------------------------------------------------------------------
+snippet else "else ..."
+else
+{
+    ${VISUAL}${0:/* else part */}
+}
+endsnippet
+
+#--------------------------------------------------------------------------
+#    switch
+#--------------------------------------------------------------------------
+snippet switch "switch"
+switch(${1:/* variable */})
+{
+    case ${2:/* variable case */}:
+        ${VISUAL}$3
+        ${4:break;}$5
+    default:
+        $6
+} /* ----  end switch  ------ */
+endsnippet
+
+#--------------------------------------------------------------------------
+#    switch
+#--------------------------------------------------------------------------
+snippet case "case"
+case ${1:/* variable case */}:
+    ${VISUAL}$2
+    ${3:break;}$4
 endsnippet
 
 # vim:ft=snippets:
