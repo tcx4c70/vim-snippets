@@ -9,53 +9,871 @@ priority -49
 ###########################################################################
 
 global !p
-
-def write_docstring_args(arglist, snip):
-	args = str(arglist).split(',')
-
-	if len(args) > 1:
-		c = 0
-		for arg in args:
-			if c == 0:
-				snip.rv += arg
-				c = 1
-			else:
-				snip += '*       : %s' % arg.strip()
-	else:
-		snip.rv = args[0]
-
-
+from docstring import *
 endglobal
 
 ###########################################################################
 #                            TextMate Snippets                            #
 ###########################################################################
+#==========================================================================
+#    preprocessor
+#==========================================================================
+#--------------------------------------------------------------------------
+#    include global header
+#--------------------------------------------------------------------------
+snippet incg "#include <...>"
+#include <${1:iostream}>
+endsnippet
+
+#--------------------------------------------------------------------------
+#    if-endif
+#--------------------------------------------------------------------------
+snippet #ifei "#if ... ... #endif" b
+#if ${1:0}
+${VISUAL}${0:/* do something */}
+#endif // ----  #if $1  `!p snip.rv = (42-len(t[1]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    if-else-endif
+#--------------------------------------------------------------------------
+snippet #ifee "#if ... ... #else ... #endif"
+#if ${1:0}
+${2:/* do something */}
+#else  // ----  not $1  `!p snip.rv = (42-len(t[1]))*'-'`
+${3:/* do something */}
+#endif // ----  #if $1  `!p snip.rv = (42-len(t[1]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    ifdef-else-endif
+#--------------------------------------------------------------------------
+snippet #ifdee "#ifdef ... ... #else ... #endif"
+#ifdef ${1:SYMBOL}
+${2:/* do something */}
+#else  // ----  not $1  `!p snip.rv = (42-len(t[1]))*'-'`
+${3:/* do something */}
+#endif // ----  #ifdef $1  `!p snip.rv = (39-len(t[1]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    ifndef-else-endif
+#--------------------------------------------------------------------------
+snippet #ifndee "#ifndef ... ... #else ... #endif"
+#ifndef ${1:SYMBOL}
+${2:/* do something */}
+#else  // ----  not $1  `!p snip.rv = (42-len(t[1]))*'-'`
+${3:/* do something */}
+#endif // ----  #ifndef $1  `!p snip.rv = (38-len(t[1]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    ifndef-define-endif
+#--------------------------------------------------------------------------
+snippet #ifndde "#ifndef ... #define ... #endif"
+#ifndef ${1/([A-Za-z0-9_]+).*/$1/}
+#define ${1:SYMBOL} ${2:value}
+#endif // ----  #ifndef $1  `!p snip.rv = (38-len(t[1]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    include header once only guard
+#--------------------------------------------------------------------------
+snippet once "include header once only guard"
+#ifndef ${1:`!p
+if not snip.c:
+	import random, string
+	name = re.sub(r'[^A-Za-z0-9]+','_', snip.fn).upper()
+	snip.rv = '__%s__' % name
+else:
+	snip.rv = snip.c`}
+#define $1
+
+${VISUAL}${0:/* continue here */}
+
+#endif // ----  #ifndef $1  `!p snip.rv = (38-len(t[1]))*'-'`
+endsnippet
+
+#==========================================================================
+#    idioms
+#==========================================================================
+#--------------------------------------------------------------------------
+#    function
+#--------------------------------------------------------------------------
+snippet fun "function" b
+// ====  FUNCTION  =============================================================
+//         Name:  $2
+//  Description:  TODO`!p write_c_function_docstring(t[3], t[1], snip, "//    ")`
+// =============================================================================
+${1:void}
+${2:function_name}($3)
+{
+	${VISUAL}$0
+} // ---- end of function $2  `!p snip.rv = (36-len(t[2]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    static function
+#--------------------------------------------------------------------------
+snippet sfun "static function" b
+// ====  FUNCTION  =============================================================
+//         Name:  $2
+//  Description:  TODO`!p write_c_function_docstring(t[3], t[1], snip, "//    ")`
+// =============================================================================
+static ${1:void}
+${2:function_name}($3)
+{
+	${VISUAL}$0
+} // ---- end of static function $2  `!p snip.rv = (29-len(t[2]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    main function
+#--------------------------------------------------------------------------
+snippet main "main() (main)"
+// ====  FUNCTION  =============================================================
+//         Name:  main
+//  Description:  TODO
+// =============================================================================
+int 
+main(int argc, char *argv[])
+{
+	${VISUAL}$0
+	return 0;
+} // ---- end of function main  --------------------------------
+endsnippet
+
+#--------------------------------------------------------------------------
+#    enum
+#--------------------------------------------------------------------------
+snippet enum "enum"
+enum ${1:enum_name}
+{
+    ${2:/* data */}
+}; // ----  end of enum $1  `!p snip.rv = (22-len(t[1]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    struct
+#--------------------------------------------------------------------------
+snippet struct "struct"
+struct ${1:struct_name}
+{
+    ${2:/* data */}
+}; // ----  end of struct $1  `!p snip.rv = (20-len(t[1]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    union
+#--------------------------------------------------------------------------
+snippet union "union"
+union ${1:union_name}
+{
+    ${2:/* data */}
+}; // ----  end of union $1  `!p snip.rv = (21-len(t[1]))*'-'`
+endsnippet
+
+#==========================================================================
+#    statements
+#==========================================================================
+#--------------------------------------------------------------------------
+#    for loop
+#--------------------------------------------------------------------------
+snippet for "for loop (for)"
+for(${1:i} = 0; $1 < ${2:count}; ${3:$1++})
+{
+	${VISUAL}${0:/* do something */}
+} // ----  end for  ------------
+endsnippet
+
+#--------------------------------------------------------------------------
+#    for int loop
+#--------------------------------------------------------------------------
+snippet fori "for int loop (fori)"
+for(${1:int} ${2:i} = 0; $2 < ${3:count}; ${4:$2++})
+{
+	${VISUAL}${0:/* do something */}
+} // ----  end for  ------------
+endsnippet
+
+#--------------------------------------------------------------------------
+#    for each loop
+#--------------------------------------------------------------------------
+snippet fore "for-each loop"
+for(${1:auto} ${2:it}: ${3:container})
+{
+    ${VISUAL}${0:/* do something */}
+} // ----  end for  ------------
+endsnippet
+
+#--------------------------------------------------------------------------
+#    while loop
+#--------------------------------------------------------------------------
+snippet while "while loop (while)"
+while(${1:1})
+{
+    ${VISUAL}${0:/* do something */}
+} // ----  end while  ----------
+endsnippet
+
+#--------------------------------------------------------------------------
+#    do-while loop
+#--------------------------------------------------------------------------
+snippet dowh "do-while loop (do-while)"
+do
+{
+    ${VISUAL}${0:/* do something */}
+}while(${1:1}); // ----  end do-while  -------
+endsnippet
+
+
+#--------------------------------------------------------------------------
+#    switch
+#--------------------------------------------------------------------------
+snippet switch "switch"
+switch(${1:/* variable */})
+{
+    case ${2:/* variable case */}:
+        ${VISUAL}$3
+        ${4:break;}$5
+    default:
+        $6
+} // ----  end switch  ---------
+endsnippet
+
+#==========================================================================
+#    oop
+#==========================================================================
+#--------------------------------------------------------------------------
+#    c++ class
+#--------------------------------------------------------------------------
+snippet cl "class"
+// ====  CLASS  ================================================================
+//        Class:  $1
+//  Description:  TODO
+// =============================================================================
+class ${1:`!p snip.rv = snip.basename or "name"`}`!p snip.rv = ": " if t[3] else ""`$3
+{
+public:
+    // ====================  LIFECYCLE     =====================================
+    $1(${2:arguments}); `!p snip.rv = (49-len(t[1].split(':'))-len(t[2]))*' '`// constructor 
+    virtual ~$1(); `!p snip.rv = (40-len(t[1]))*' '`// destructor
+
+    // ====================  ACCESSORS     =====================================
+
+    // ====================  MUTATORS      =====================================
+
+    // ====================  OPERATORS     =====================================
+
+    // ====================  METHODS       =====================================
+
+    // ====================  DATA MEMBERS  =====================================
+
+protected:
+    // ====================  METHODS       =====================================
+
+    // ====================  DATA MEMBERS  =====================================
+
+private:
+    // ====================  METHODS       =====================================
+
+    // ====================  DATA MEMBERS  =====================================
+
+}; // ----  end of class $1  ----`!p snip.rv = (33-len(t[1]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    c++ class with copy constructor
+#--------------------------------------------------------------------------
+snippet clc "class with copy constructor"
+// ====  CLASS  ================================================================
+//        Class:  $1
+//  Description:  TODO
+// =============================================================================
+class ${1:`!p snip.rv = snip.basename or "name"`}`!p snip.rv = ": " if t[3] else ""`$3
+{
+public:
+    // ====================  LIFECYCLE     =====================================
+    $1(${2:arguments}); `!p snip.rv = (49-len(t[1])-len(t[2]))*' '`// constructor 
+    $1(const $1 &other); `!p snip.rv = (36-2*len(t[1]))*' '`// copy constructor
+    virtual ~$1(); `!p snip.rv = (40-len(t[1]))*' '`// destructor
+
+    // ====================  ACCESSORS     =====================================
+
+    // ====================  MUTATORS      =====================================
+
+    // ====================  OPERATORS     =====================================
+    $1& operator=(const $1 &other); `!p snip.rv = (25-2*len(t[1]))*' '`// assignment operator
+
+    // ====================  METHODS       =====================================
+
+    // ====================  DATA MEMBERS  =====================================
+
+protected:
+    // ====================  METHODS       =====================================
+
+    // ====================  DATA MEMBERS  =====================================
+
+private:
+    // ====================  METHODS       =====================================
+
+    // ====================  DATA MEMBERS  =====================================
+
+}; // ----  end of class $1  ----`!p snip.rv = (33-len(t[1]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    c++ template class
+#--------------------------------------------------------------------------
+snippet tcl "template class"
+// ==== TEMPLATE CLASS  ========================================================
+//        Class:  $1
+//  Description:  <CURSOR>
+// =============================================================================
+template <class T>
+class ${1:`!p snip.rv = snip.basename or "name"`}`!p snip.rv = ": " if t[3] else ""`$3
+{
+public:
+    // ====================  LIFECYCLE     =====================================
+    $1(${2:arguments}); `!p snip.rv = (49-len(t[1])-len(t[2]))*' '`// constructor 
+    virtual ~$1(); `!p snip.rv = (40-len(t[1]))*' '`// destructor
+
+    // ====================  ACCESSORS     =====================================
+
+    // ====================  MUTATORS      =====================================
+
+    // ====================  OPERATORS     =====================================
+
+    // ====================  METHODS       =====================================
+
+    // ====================  DATA MEMBERS  =====================================
+
+protected:
+    // ====================  METHODS       =====================================
+
+    // ====================  DATA MEMBERS  =====================================
+
+private:
+    // ====================  METHODS       =====================================
+
+    // ====================  DATA MEMBERS  =====================================
+
+}; // ----  end of template class $1  ----`!p snip.rv = (24-len(t[1]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    c++ template class with copy constructor
+#--------------------------------------------------------------------------
+snippet tclc "template class with copy constructor"
+// ====  TEMPLATE CLASS  =======================================================
+//        Class:  $1
+//  Description:  <CURSOR>
+// =============================================================================
+template <class T>
+class ${1:`!p snip.rv = snip.basename or "name"`}`!p snip.rv = ": " if t[3] else ""`$3
+{
+public:
+    // ====================  LIFECYCLE     =====================================
+    $1(${2:arguments}); `!p snip.rv = (49-len(t[1])-len(t[2]))*' '`// constructor 
+    $1(const $1 &other); `!p snip.rv = (36-2*len(t[1]))*' '`// copy constructor
+    virtual ~$1(); `!p snip.rv = (40-len(t[1]))*' '`// destructor
+
+    // ====================  ACCESSORS     =====================================
+
+    // ====================  MUTATORS      =====================================
+
+    // ====================  OPERATORS     =====================================
+    $1& operator=(const $1 &other); `!p snip.rv = (25-2*len(t[1]))*' '`// assignment operator
+
+    // ====================  METHODS       =====================================
+
+    // ====================  DATA MEMBERS  =====================================
+
+protected:
+    // ====================  METHODS       =====================================
+
+    // ====================  DATA MEMBERS  =====================================
+
+private:
+    // ====================  METHODS       =====================================
+
+    // ====================  DATA MEMBERS  =====================================
+
+}; // ----  end of template class $1  ----`!p snip.rv = (24-len(t[1]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    c++ error class
+#--------------------------------------------------------------------------
+snippet ecl "error class"
+// ====  ERROR CLASS  ==========================================================
+//        Class:  $1
+//  Description:  TODO
+// =============================================================================
+class ${1:`!p snip.rv = snip.basename or "name"`}`!p snip.rv = ": " if t[3] else ""`$3
+{
+public:
+    $1(std::string msg = "${2:$1}"): m_Message(msg) {}
+    virtual ~$1() {}
+    virtual std::string what() const throw()  { return m_Message; }
+protected:
+    std::string m_Message;
+}; // ----  end of class $1  ----`!p snip.rv = (33-len(t[1]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    implementation of constructor of class
+#--------------------------------------------------------------------------
+snippet iclc "constructor"
+// ----  IMPLEMENTATION  -------------------------------------------------------
+//        Class:  $1
+//       Method:  $1
+//  Description:  constructor
+// -----------------------------------------------------------------------------
+${1:`!p snip.rv = snip.basename or "name"`}::$1($2)
+{$0
+}  // ----  end of method $1::$1 (constructor)  ----`!p snip.rv = (16-2*len(t[1]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    implementation of destructor of class
+#--------------------------------------------------------------------------
+snippet icld "destructor"
+// ----  IMPLEMENTATION  -------------------------------------------------------
+//        Class:  $1
+//       Method:  ~$1
+//  Description:  destructor
+// -----------------------------------------------------------------------------
+${1:`!p snip.rv = snip.basename or "name"`}::~$1()
+{$0
+}  // ----  end of method $1::~$1 (destructor)  ----`!p snip.rv = (16-2*len(t[1]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    implementation of constructor, copy cnstructor, destructor, and 
+#    assignment operator of class
+#--------------------------------------------------------------------------
+snippet icln
+// ----  IMPLEMENTATION  -------------------------------------------------------
+//        Class:  $1
+//       Method:  $1
+//  Description:  constructor
+// -----------------------------------------------------------------------------
+${1:`!p snip.rv = snip.basename or "name"`}::$1($2)
+{$3
+}  // ----  end of method $1::$1 (constructor)  ----`!p snip.rv = (16-2*len(t[1]))*'-'`
+
+// ----  IMPLEMENTATION  -------------------------------------------------------
+//        Class:  $1
+//       Method:  $1
+//  Description:  copy constructor
+// -----------------------------------------------------------------------------
+$1::$1(const $1 &other)
+{$4
+}  // ----  end of method $1::$1 (copy constructor)  ----`!p snip.rv = (11-2*len(t[1]))*'-'`
+
+// ----  IMPLEMENTATION  -------------------------------------------------------
+//        Class:  $1
+//       Method:  ~$1
+//  Description:  destructor
+// -----------------------------------------------------------------------------
+$1::~$1()
+{$5
+}  // ----  end of method $1::~$1 (destructor)  ----`!p snip.rv = (16-2*len(t[1]))*'-'`
+
+// ----  IMPLEMENTATION  -------------------------------------------------------
+//        Class:  $1
+//       Method:  operator=
+//  Description:  assignment operator
+// -----------------------------------------------------------------------------
+$1&
+$1::operator=(const $1 &other)
+{
+    if(this != &other)
+    {$0
+    }
+
+    return *this;
+}  // ----  end of method $1::operator= (assignment operator)  ----
+endsnippet
+
+#--------------------------------------------------------------------------
+#    implementation of method of class
+#--------------------------------------------------------------------------
+snippet iclm "method of class"
+// ----  IMPLEMENTATION  -------------------------------------------------------
+//        Class:  $2
+//       Method:  $3
+//  Description:  TODO`!p write_c_function_docstring(t[4], t[1], snip, "//    ")`
+// -----------------------------------------------------------------------------
+${1:void}
+${2:`!p snip.rv = snip.basename or "name"`}::${3:methodName}($4)
+{$0
+} // ----  end of method $2::$3  ----`!p snip.rv = (31-len(t[2])-len(t[3]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    implementation of accessor of class
+#--------------------------------------------------------------------------
+snippet iclac "accessor"
+// ----  IMPLEMENTATION  -------------------------------------------------------
+//        Class:  $3
+//       Method:  get$4
+// -----------------------------------------------------------------------------
+${1:inline }${2:int}
+${3:`!p snip.rv = snip.basename or "name"`}::get${4:Attribute}() const
+{
+    ${0:return this->m_$4;}
+} // ----  end of method $3::get$4  ----`!p snip.rv = (28-len(t[3])-len(t[4]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    implementation of mutator of class
+#--------------------------------------------------------------------------
+snippet iclmu "mutator"
+// ----  IMPLEMENTATION  -------------------------------------------------------
+//        Class:  $2
+//       Method:  set${4/\w+/\u$0/}
+// -----------------------------------------------------------------------------
+${1:inline }void
+${2:`!p snip.rv = snip.basename or "name"`}::set${4/\w+/\u$0/}(${3:int ${4:attribute}})
+{
+    ${0:this->m_${4/\w+/\u$0/} = $4;}
+} // ----  end of method $2::set${4/\w+/\u$0/}  ----`!p snip.rv = (28-len(t[2])-len(t[4]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    implementation of constructor of tempalte class
+#--------------------------------------------------------------------------
+snippet itclc "constructor"
+// ----  IMPLEMENTATION  -------------------------------------------------------
+//        Class:  $1
+//       Method:  $1
+//  Description:  constructor
+// -----------------------------------------------------------------------------
+template <class T>
+${1:`!p snip.rv = snip.basename or "name"`}<T>::$1()
+{$0
+} // ----  end of $1<T>::$1 (constructor)  ----`!p snip.rv = (21-2*len(t[1]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    implementation of destructor of tempalte class
+#--------------------------------------------------------------------------
+snippet itcld "destrcutor"
+// ----  IMPLEMENTATION  -------------------------------------------------------
+//        Class:  $1
+//       Method:  ~$1
+//  Description:  constructor
+// -----------------------------------------------------------------------------
+template <class T>
+${1:`!p snip.rv = snip.basename or "name"`}<T>::~$1()
+{$0
+} // ----  end of $1<T>::~$1 (destructor)  ----`!p snip.rv = (21-2*len(t[1]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    implementation of constructor, copy cnstructor, destructor, and 
+#    assignment operator of template class
+#--------------------------------------------------------------------------
+snippet itcln
+// ----  IMPLEMENTATION  -------------------------------------------------------
+//        Class:  $1
+//       Method:  $1
+//  Description:  constructor
+// -----------------------------------------------------------------------------
+template <class T>
+${1:`!p snip.rv = snip.basename or "name"`}<T>::$1($2)
+{$3
+}  // ----  end of method $1<T>::$1 (constructor)  ----`!p snip.rv = (13-2*len(t[1]))*'-'`
+
+// ----  IMPLEMENTATION  -------------------------------------------------------
+//        Class:  $1
+//       Method:  $1
+//  Description:  copy constructor
+// -----------------------------------------------------------------------------
+template <class T>
+$1<T>::$1(const $1 &other)
+{$4
+}  // ----  end of method $1<T>::$1 (copy constructor)  ----`!p snip.rv = (8-2*len(t[1]))*'-'`
+
+// ----  IMPLEMENTATION  -------------------------------------------------------
+//        Class:  $1
+//       Method:  ~$1
+//  Description:  destructor
+// -----------------------------------------------------------------------------
+template <class T>
+$1<T>::~$1()
+{$5
+}  // ----  end of method $1<T>::~$1 (destructor)  ----`!p snip.rv = (13-2*len(t[1]))*'-'`
+
+// ----  IMPLEMENTATION  -------------------------------------------------------
+//        Class:  $1
+//       Method:  operator=
+//  Description:  assignment operator
+// -----------------------------------------------------------------------------
+template <class T> 
+$1<T>&
+$1<T>::operator=(const $1<T> &other)
+{
+    if(this != &other)
+    {$0
+    }
+
+    return *this;
+}  // ----  end of method $1<T>::operator= (assignment operator)  ----
+endsnippet
+
+#--------------------------------------------------------------------------
+#    implementation of method of template class
+#--------------------------------------------------------------------------
+snippet itclm "method of template class"
+// ----  IMPLEMENTATION  -------------------------------------------------------
+//        Class:  $2
+//       Method:  $3
+//  Description:  TODO`!p write_c_function_docstring(t[4], t[1], snip, "//    ")`
+// -----------------------------------------------------------------------------
+template <class T>
+${1:void}
+${2:`!p snip.rv = snip.basename or "name"`}<T>::${3:methodName}($4)
+{$0
+} // ----  end of method $2<T>::$3  ----`!p snip.rv = (28-len(t[2])-len(t[3]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    implementation of accessor of template class
+#--------------------------------------------------------------------------
+snippet itclac "accessor"
+// ----  IMPLEMENTATION  -------------------------------------------------------
+//        Class:  $3
+//       Method:  get$4
+// -----------------------------------------------------------------------------
+template <class T>
+${1:inline }${2:int}
+${3:`!p snip.rv = snip.basename or "name"`}<T>::get${4:Attribute}() const
+{
+    ${0:return this->m_$4;}
+} // ----  end of method $3<T>::get$4  ----`!p snip.rv = (25-len(t[3])-len(t[4]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    implementation of mutator of template class
+#--------------------------------------------------------------------------
+snippet itclmu "mutator"
+// ----  IMPLEMENTATION  -------------------------------------------------------
+//        Class:  $2
+//       Method:  set${4/\w+/\u$0/}
+// -----------------------------------------------------------------------------
+template <class T>
+${1:inline }void
+${2:`!p snip.rv = snip.basename or "name"`}<T>::set${4/\w+/\u$0/}(${3:int ${4:attribute}})
+{
+    ${0:this->m_${4/\w+/\u$0/} = $4;}
+} // ----  end of method $2<T>::set${4/\w+/\u$0/}  ----`!p snip.rv = (25-len(t[2])-len(t[4]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    template function
+#--------------------------------------------------------------------------
+snippet tfun "template function"
+// ====  TEMPLATE FUNCTION  ====================================================
+//  Template Function Name:  $2
+//             Description:  TODO`!p write_c_function_docstring(t[3], t[1], snip, "//    ")`
+// =============================================================================
+template <typename T>
+${1:void}
+${2:template_function_name}($3)
+{
+    ${VISUAL}$0
+} // ----  end of template function $2  -----`!p snip.rv = (23-len(t[2]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    overload of operator<<
+#--------------------------------------------------------------------------
+snippet iopo "overlaod <<"
+// ---- IMPLEMENTATION ---------------------------------------------------------
+//  Function Name:  operator<<
+//    Description:  TODO
+// ------------------------------------------------------------------------------
+ostream &
+operator<<(ostream &os, const ${1:class_name} &obj)
+{
+    ${2:os << obj.$3;}
+    return os;
+} // ----  end of function operator<<  -------------------------
+endsnippet
+
+#--------------------------------------------------------------------------
+#    overload of operator>>
+#--------------------------------------------------------------------------
+snippet iopi "overlaod >>"
+// ---- IMPLEMENTATION ---------------------------------------------------------
+//  Function Name:  operator>>
+//    Description:  TODO
+// ------------------------------------------------------------------------------
+istream &
+operator>>(istream &is, ${1:class_name} &obj)
+{
+    ${2:is >> obj.$3;}
+    return is;
+} // ----  end of function operator>>  -------------------------
+endsnippet
+
+#--------------------------------------------------------------------------
+#    try catch
+#--------------------------------------------------------------------------
+snippet try "try-catch"
+try
+{
+    ${VISUAL}$2
+}
+// handle exception: $1
+catch(const ${1:exception_name} &excepObj)
+{
+    $3
+}$4
+// handle excepton: unspecified
+catch(...)
+{
+    $0
+}
+endsnippet
+
+#--------------------------------------------------------------------------
+#    catch
+#--------------------------------------------------------------------------
+snippet catch "catch"
+// handle exception: $1
+catch(const ${1:exception_name} &excepObj)
+{
+    $2
+}$0
+endsnippet
+
+#--------------------------------------------------------------------------
+#    catch all
+#--------------------------------------------------------------------------
+snippet catchall "catch-all"
+// handle excepton: unspecified
+catch(...)
+{
+    $0
+}
+endsnippet
+
+#--------------------------------------------------------------------------
+#    extern C
+#--------------------------------------------------------------------------
+snippet exc "extern C"
+extern "C"
+{$0
+}
+endsnippet
+
+#--------------------------------------------------------------------------
+#    open input file
+#--------------------------------------------------------------------------
+snippet opif "open input file"
+string ifsFileName = "${1:file_name}"; `!p snip.rv = (23-len(t[1]))*' '`// input file name 
+ifstream ifs;                                   // create ifstream object 
+
+ifs.open(ifsFileName.c_str());                  // open ifstream 
+if(!ifs)
+{
+    cerr << "\nERROR: failed to open input file " << ifsFileName << endl;
+    exit(1);
+}
+
+${0:/* continue here */}
+
+ifs.close(); // close ifstream 
+endsnippet
+
+#--------------------------------------------------------------------------
+#    open output file
+#--------------------------------------------------------------------------
+snippet opof "open output file"
+string ofsFileName = "${1:file_name}"; `!p snip.rv = (23-len(t[1]))*' '`// output file name 
+ofstream ofs;                                   // create ofstream object 
+
+ofs.open(ofsFileName.c_str());                  // open ofstream 
+if(!ifs)
+{
+    cerr << "\nERROR: failed to open output file " << ofsFileName << endl;
+    exit(1);
+}
+
+${0:/* continue here */}
+
+ofs.close(); // close ofstream 
+endsnippet
+
+#--------------------------------------------------------------------------
+#    using namespace std
+#--------------------------------------------------------------------------
+snippet uns "using namespace std"
+using namespace std;
+endsnippet
+
+#--------------------------------------------------------------------------
+#    using namespace ...
+#--------------------------------------------------------------------------
+snippet un "using namespace ..."
+using namespace ${1:std};
+endsnippet
+
+#--------------------------------------------------------------------------
+#    namespace block
+#--------------------------------------------------------------------------
+snippet nab "namespace block ..."
+namespace ${1:name_space}
+{
+    ${VISUAL}$0
+} // ----  end of namespace $1  ----`!p snip.rv = (30-len(t[1]))*'-'`
+endsnippet
+
+#--------------------------------------------------------------------------
+#    namespace alias
+#--------------------------------------------------------------------------
+snippet naa "namespace alias"
+namespace ${1:namespace_alias} = ${2:original_namespace_name};
+endsnippet
+
+#--------------------------------------------------------------------------
+#    begin-end
+#--------------------------------------------------------------------------
 snippet beginend "$1.begin(), $1.end() (beginend)"
 ${1:v}${1/^.*?(-)?(>)?$/(?2::(?1:>:.))/}begin(), $1${1/^.*?(-)?(>)?$/(?2::(?1:>:.))/}end()
 endsnippet
 
-snippet cl "class .. (class)"
-class ${1:`!p snip.rv = snip.basename or "name"`}
-{
-public:
-	${1/(\w+).*/$1/} (${2:arguments});
-	virtual ~${1/(\w+).*/$1/} ();
-
-private:
-	${0:/* data */}
-};
+#--------------------------------------------------------------------------
+#    map
+#--------------------------------------------------------------------------
+snippet map "std::map (map)"
+${3:std::}map<${1:key}, ${2:value}> map$0;
 endsnippet
 
-snippet ns "namespace .. (namespace)"
-namespace${1/.+/ /m}${1:`!p snip.rv = snip.basename or "name"`}
-{
-	${VISUAL}$0
-}${1/.+/ \/* /m}$1${1/.+/ *\/ /m}
+#--------------------------------------------------------------------------
+#    vector
+#--------------------------------------------------------------------------
+snippet vector "std::vector (v)"
+${3:std::}vector<${1:char}> v$0;
 endsnippet
 
+#--------------------------------------------------------------------------
+#    template <typename ...>
+#--------------------------------------------------------------------------
+snippet tp "template <typename ..> (template)"
+template <typename ${1:_InputIter}>
+endsnippet
+
+#--------------------------------------------------------------------------
+#    read from file
+#--------------------------------------------------------------------------
 snippet readfile "read file (readF)"
 std::vector<char> v;
-if (FILE *fp = fopen(${1:"filename"}, "r"))
+if(FILE *fp = fopen(${1:"filename"}, "r"))
 {
 	char buf[1024];
 	while(size_t len = fread(buf, 1, sizeof(buf), fp))
@@ -64,47 +882,4 @@ if (FILE *fp = fopen(${1:"filename"}, "r"))
 }
 endsnippet
 
-snippet map "std::map (map)"
-std::map<${1:key}, ${2:value}> map$0;
-endsnippet
-
-snippet vector "std::vector (v)"
-std::vector<${1:char}> v$0;
-endsnippet
-
-snippet tp "template <typename ..> (template)"
-template <typename ${1:_InputIter}>
-endsnippet
-
-snippet cla "An entire .h generator" b
-#ifndef ${2:`!v substitute(vim_snippets#Filename('$1_H','ClassName'),'.*','\U&\E','')`}
-#define $2
-
-class ${1:`!v substitute(substitute(vim_snippets#Filename('$1','ClassName'),'^.','\u&',''), '_\(\w\)', '\u\1', 'g')`}
-{
-private:
-	$3
-
-public:
-	$1();
-	virtual ~$1();
-};
-
-#endif /* $2 */
-endsnippet
-
-
-snippet fnc "Basic c++ doxygen function template" b
-/**
-* @brief: ${4:brief}
-*
-* @param: `!p write_docstring_args(t[3],snip)`
-*
-* @return: `!p snip.rv = t[1]`
-*/
-${1:ReturnType} ${2:FunctionName}(${3:param})
-{
-  ${0:FunctionBody}
-}
-endsnippet
 # vim:ft=snippets:

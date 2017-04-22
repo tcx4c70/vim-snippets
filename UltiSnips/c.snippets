@@ -130,7 +130,7 @@ snippet fun "function" b
 /*
  * ====  FUNCTION  =============================================================
  *         Name:  $2
- *  Description:  TODO`!p write_c_function_docstring(t, snip)`
+ *  Description:  TODO`!p write_c_function_docstring(t[3], t[1], snip, " *    ")`
  * =============================================================================
  */
 ${1:void}
@@ -147,7 +147,7 @@ snippet sfun "static function" b
 /*
  * ====  FUNCTION  =============================================================
  *         Name:  $2
- *  Description:  TODO`!p write_c_function_docstring(t, snip)`
+ *  Description:  TODO`!p write_c_function_docstring(t[3], t[1], snip, " *    ")`
  * =============================================================================
  */
 static ${1:void}
@@ -306,7 +306,9 @@ if(NULL == $1)
     fprintf(stderr, "couldn't open file '%s'; %s\n", $2, strerror(errno));
     exit(1);
 }
+
 ${4:/* cotinue here */}
+
 /* close input file */
 if(EOF == fclose($1))
 {
@@ -328,7 +330,9 @@ if(NULL == $1)
     fprintf(stderr, "couldn't open file '%s'; %s\n", $2, strerror(errno));
     exit(1);
 }
+
 ${4:/* cotinue here */}
+
 /* close output file */
 if(EOF == fclose($1))
 {
@@ -439,7 +443,7 @@ switch(${1:/* variable */})
 endsnippet
 
 #--------------------------------------------------------------------------
-#    switch
+#    case
 #--------------------------------------------------------------------------
 snippet case "case"
 case ${1:/* variable case */}:
