@@ -5,7 +5,7 @@
 priority -50
 
 global !p
-from docstring import *
+from csnippts import *
 endglobal
 
 #==========================================================================
@@ -44,8 +44,8 @@ endsnippet
 #--------------------------------------------------------------------------
 snippet #ifei "#if ... ... #endif" b
 #if ${1:0}
-${VISUAL}${0:/* do something */}
-#endif /* ----  #if $1  `!p snip.rv = (39-len(t[1]))*'-'` */
+${VISUAL}${2:/* do something */}
+#endif /* ----  #if $1  `!p snip.rv = (35-len(t[1]))*'-'`---- */
 endsnippet
 
 #--------------------------------------------------------------------------
@@ -54,9 +54,18 @@ endsnippet
 snippet #ifee "#if ... ... #else ... #endif"
 #if ${1:0}
 ${2:/* do something */}
-#else  /* ----  not $1  `!p snip.rv = (39-len(t[1]))*'-'` */
+#else  /* ----  not $1  `!p snip.rv = (35-len(t[1]))*'-'`---- */
 ${3:/* do something */}
-#endif /* ----  #if $1  `!p snip.rv = (39-len(t[1]))*'-'` */
+#endif /* ----  #if $1  `!p snip.rv = (35-len(t[1]))*'-'`---- */
+endsnippet
+
+#--------------------------------------------------------------------------
+#    ifdef-endif
+#--------------------------------------------------------------------------
+snippet #ifdei "#ifdef ... ... #endif"
+#ifdef ${1:0}
+${VISUAL}${2:/* do something */}
+#endif /* ----  #ifdef $1  `!p snip.rv = (32-len(t[1]))*'-'`---- */
 endsnippet
 
 #--------------------------------------------------------------------------
@@ -65,9 +74,9 @@ endsnippet
 snippet #ifdee "#ifdef ... ... #else ... #endif"
 #ifdef ${1:SYMBOL}
 ${2:/* do something */}
-#else  /* ----  not $1  `!p snip.rv = (39-len(t[1]))*'-'` */
+#else  /* ----  not $1  `!p snip.rv = (35-len(t[1]))*'-'`---- */
 ${3:/* do something */}
-#endif /* ----  #ifdef $1  `!p snip.rv = (36-len(t[1]))*'-'` */
+#endif /* ----  #ifdef $1  `!p snip.rv = (32-len(t[1]))*'-'`---- */
 endsnippet
 
 #--------------------------------------------------------------------------
@@ -76,9 +85,9 @@ endsnippet
 snippet #ifndee "#ifndef ... ... #else ... #endif"
 #ifndef ${1:SYMBOL}
 ${2:/* do something */}
-#else  /* ----  not $1  `!p snip.rv = (39-len(t[1]))*'-'` */
+#else  /* ----  not $1  `!p snip.rv = (35-len(t[1]))*'-'`---- */
 ${3:/* do something */}
-#endif /* ----  #ifndef $1  `!p snip.rv = (35-len(t[1]))*'-'` */
+#endif /* ----  #ifndef $1  `!p snip.rv = (31-len(t[1]))*'-'`---- */
 endsnippet
 
 #--------------------------------------------------------------------------
@@ -87,7 +96,7 @@ endsnippet
 snippet #ifndde "#ifndef ... #define ... #endif"
 #ifndef ${1/([A-Za-z0-9_]+).*/$1/}
 #define ${1:SYMBOL} ${2:value}
-#endif /* ----  #ifndef $1  `!p snip.rv = (35-len(t[1]))*'-'` */
+#endif /* ----  #ifndef $1  `!p snip.rv = (31-len(t[1]))*'-'`---- */
 endsnippet
 
 #--------------------------------------------------------------------------
@@ -99,7 +108,7 @@ ${1:#pragma mark -
 }#pragma mark $2
 #endif
 
-$0
+$3
 endsnippet
 
 #--------------------------------------------------------------------------
@@ -115,9 +124,9 @@ else:
 	snip.rv = snip.c`}
 #define $1
 
-${VISUAL}${0:/* continue here */}
+${VISUAL}${2:/* continue here */}
 
-#endif /* ----  #ifndef $1  `!p snip.rv = (35-len(t[1]))*'-'` */
+#endif /* ----  #ifndef $1  `!p snip.rv = (31-len(t[1]))*'-'`---- */
 endsnippet
 
 #==========================================================================
@@ -136,8 +145,8 @@ snippet fun "function" b
 ${1:void}
 ${2:function_name}($3)
 {
-	${VISUAL}$0
-} /* ---- end of function $2  `!p snip.rv = (33-len(t[2]))*'-'` */
+	${VISUAL}$4
+} /* ---- end of function $2  `!p snip.rv = (29-len(t[2]))*'-'`---- */
 endsnippet
 
 #--------------------------------------------------------------------------
@@ -153,8 +162,8 @@ snippet sfun "static function" b
 static ${1:void}
 ${2:function_name}($3)
 {
-	${VISUAL}$0
-} /* ---- end of static function $2  `!p snip.rv = (26-len(t[2]))*'-'` */
+	${VISUAL}$4
+} /* ---- end of static function $2  `!p snip.rv = (22-len(t[2]))*'-'`---- */
 endsnippet
 
 #--------------------------------------------------------------------------
@@ -170,7 +179,7 @@ snippet main "main() (main)"
 int 
 main(int argc, char *argv[])
 {
-	${VISUAL}$0
+	${VISUAL}$1
 	return 0;
 } /* ---- end of function main  ----------------------------- */
 endsnippet
@@ -182,8 +191,8 @@ snippet enum "enum"
 enum ${1:enum_name}
 {
     ${2:/* data */}
-}; /* ----  end of enum $1  `!p snip.rv = (19-len(t[1]))*'-'` */
-${3:typedef enum $1 ${0:$1_t};}
+}; /* ----  end of enum $1  `!p snip.rv = (15-len(t[1]))*'-'`---- */
+${3:typedef enum $1 ${4:$1_t};}
 endsnippet
 
 #--------------------------------------------------------------------------
@@ -193,8 +202,8 @@ snippet struct "struct"
 struct ${1:struct_name}
 {
     ${2:/* data */}
-}; /* ----  end of struct $1  `!p snip.rv = (17-len(t[1]))*'-'` */
-${3:typedef struct $1 ${0:$1_t};}
+}; /* ----  end of struct $1  `!p snip.rv = (13-len(t[1]))*'-'`---- */
+${3:typedef struct $1 ${4:$1_t};}
 endsnippet
 
 #--------------------------------------------------------------------------
@@ -204,8 +213,8 @@ snippet union "union"
 union ${1:union_name}
 {
     ${2:/* data */}
-}; /* ----  end of union $1  `!p snip.rv = (18-len(t[1]))*'-'` */
-${3:typedef union $1 ${0:$1_t};}
+}; /* ----  end of union $1  `!p snip.rv = (14-len(t[1]))*'-'`---- */
+${3:typedef union $1 ${4:$1_t};}
 endsnippet
 
 #--------------------------------------------------------------------------
@@ -246,7 +255,7 @@ if(NULL == $2)
     fprintf(stderr, "\ndynamic memory allocation failed\n");
     exit(1);
 }
-${0:/* continue here */}
+${5:/* continue here */}
 free($2);
 $2 = NULL;
 endsnippet
@@ -261,7 +270,7 @@ if(NULL == $2)
     fprintf(stderr, "\ndynamic memory allocation failed\n");
     exit(1);
 }
-${0:/* continue here */}
+${5:/* continue here */}
 free($2);
 $2 = NULL;
 endsnippet
@@ -276,21 +285,21 @@ if(NULL == $1)
     fprintf(stderr, "\ndynamic memory allocation failed\n");
     exit(1);
 }
-${0:/* continue here */}
+${5:/* continue here */}
 endsnippet
 
 #--------------------------------------------------------------------------
 #    sizeof
 #--------------------------------------------------------------------------
 snippet so "sizeof ..."
-sizeof($0);
+sizeof($1);
 endsnippet
 
 #--------------------------------------------------------------------------
 #    assert
 #--------------------------------------------------------------------------
 snippet as "assert ..."
-assert($0);
+assert($1);
 endsnippet
 
 #--------------------------------------------------------------------------
@@ -348,9 +357,9 @@ endsnippet
 #    for loop
 #--------------------------------------------------------------------------
 snippet for "for loop (for)"
-for(${1:i} = 0; $1 < ${2:count}; ${3:$1++})
+for(${1:i} = 0; $1 < ${2:count}; ${3:$1 ++})
 {
-	${VISUAL}${0:/* do something */}
+	${VISUAL}${4:/* do something */}
 } /* ----  end for  --------- */
 endsnippet
 
@@ -358,9 +367,9 @@ endsnippet
 #    for int loop
 #--------------------------------------------------------------------------
 snippet fori "for int loop (fori)"
-for(${1:int} ${2:i} = 0; $2 < ${3:count}; ${4:$2++})
+for(${1:int} ${2:i} = 0; $2 < ${3:count}; ${4:$2 ++})
 {
-	${VISUAL}${0:/* do something */}
+	${VISUAL}${5:/* do something */}
 } /* ----  end for  --------- */
 endsnippet
 
@@ -370,7 +379,7 @@ endsnippet
 snippet while "while loop (while)"
 while(${1:1})
 {
-    ${VISUAL}${0:/* do something */}
+    ${VISUAL}${2:/* do something */}
 } /* ----  end while  ------- */
 endsnippet
 
@@ -380,7 +389,7 @@ endsnippet
 snippet dowh "do-while loop (do-while)"
 do
 {
-    ${VISUAL}${0:/* do something */}
+    ${VISUAL}${2:/* do something */}
 }while(${1:1}); /* ----  end do-while  ---- */
 endsnippet
 
@@ -390,7 +399,7 @@ endsnippet
 snippet if "if ... ..."
 if(${1:/* condition */})
 {
-    ${VISUAL}${0:/* if part */}
+    ${VISUAL}${2:/* if part */}
 }
 endsnippet
 
@@ -404,7 +413,7 @@ if(${1:/* condition */})
 }
 else
 {
-    ${0:/* else part */}
+    ${3:/* else part */}
 }
 endsnippet
 
@@ -414,7 +423,7 @@ endsnippet
 snippet elif "else if ... ..."
 else if(${1:/* condition */})
 {
-	${VISUAL}${0:/* else if part */}
+	${VISUAL}${2:/* else if part */}
 }
 endsnippet
 
@@ -424,7 +433,7 @@ endsnippet
 snippet else "else ..."
 else
 {
-    ${VISUAL}${0:/* else part */}
+    ${VISUAL}${1:/* else part */}
 }
 endsnippet
 
